@@ -1,9 +1,9 @@
-# Asegurados IMSS
+# asegurados IMSS
 # @elvagodeldato
 
-## Los acentos se omiten intencionalmente
+## los acentos se omiten intencionalmente
 
-# Librerias
+# librerias
 library(readxl)
 library(dplyr)
 library(ggplot2)
@@ -14,22 +14,46 @@ library(tidyr)
 
 # PATH
 
-# Carga de datos
-(asegurados <- read_excel(paste0(bases,"asegurados_mexicocomovamos.xlsx"),col_types = c("guess", "guess", "guess", "guess", "guess", "guess")))
+# carga de datos
+(asegurados <- read_excel(paste0(bases,"asegurados_mexicocomovamos_abr.xlsx"),col_types = c("guess", "guess", "guess", "guess", "guess", "guess")))
 
-# Asegurados IMSS
-(asegurados %>% 
+asegurados <- asegurados %>% 
   separate(`Año/Mes`,into = c ( 'Year','Month'),sep = '/', remove = T) %>% 
   clean_names() %>% 
-    unite(Periodo,c('year','month'), sep = "-", remove = T) %>% 
-    ggplot()+geom_line(aes(x = Periodo, y = tasa_anual_de_crecimiento), group = 1) + labs(
+  unite(Periodo,c('year','month'), sep = "-", remove = T)
+
+colnames(asegurados)
+
+asegurados %>% 
+  glimpse()
+
+asegurados_2018 <- asegurados %>% 
+  filter(Periodo >= "2018-01")
+
+asegurados[asegurados$Periodo == "2020-04",]
+
+ggplot(asegurados_2018) +
+  geom_line(aes(x = Periodo, y = tasa_anual_de_crecimiento), group = 1) + 
+  labs(
       x = '',
       y = '',
       title = 'Asegurados al IMSS',
+      subtitle = 'variación mensual anual',
       caption = "Fuente: Elaborado por @elvagodeldato con información de México,¿Cómo Vamos?"
       
-    )+  theme(axis.text.x = element_text(angle = 45, hjust = 1)))
+    )+  theme(axis.text.x = element_text(angle = 90, hjust = 1,size =3)) + scale_y_continuous(labels = scales::percent)
 
+
+as_mar <- asegurados %>% 
+  separate(`Año/Mes`,into = c ( 'Year','Month'),sep = '/', remove = T) %>% 
+  filter(Month=='04') %>% 
+  clean_names() %>% 
+  unite(Periodo,c('year','month'), sep = "-", remove = T)
+
+
+as_mar %>% 
+  select(Periodo,generacion_de_empleo_formal_mensual) %>% 
+  ggplot() + geom_col(aes(x= Periodo, y = generacion_de_empleo_formal_mensual))
 
 # Tasa de creciemiento
 asegurados %>% 
